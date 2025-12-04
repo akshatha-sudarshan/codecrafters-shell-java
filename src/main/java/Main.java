@@ -31,7 +31,7 @@ public class Main {
 //                continue;
             }
 
-            if (inputArray[0].equals("echo")) {
+            else if (inputArray[0].equals("echo")) {
                 for (int i = 1; i < inputArray.length; i++) {
                     System.out.print(inputArray[i]);
                     if (i != inputArray.length - 1) {
@@ -41,7 +41,8 @@ public class Main {
                 System.out.println();
                 continue;
             }
-            System.out.println(input + ": command not found");
+            else
+                System.out.println(input + ": command not found");
 //            scanner.close();
         }
 
