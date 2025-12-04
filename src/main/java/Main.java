@@ -13,8 +13,10 @@ public class Main {
             }
             String[] inputArray = input.split(" ");
             if(inputArray[0].equals("type") && inputArray.length == 2){
-                if(inputArray[1].equals("echo")||inputArray[1].equals("exit")||inputArray[1].equals("type"))
+                if(inputArray[1].equals("echo")||inputArray[1].equals("exit")||inputArray[1].equals("type")){
                     System.out.println(inputArray[1]+" is a shell builtin");
+                    continue;
+                }
                  else{
                     String executablePath = findExecutableOnPath(inputArray[1]);
                     if (executablePath != null) {
