@@ -28,10 +28,9 @@ public class Main {
                         continue;
                     }
                 }
-                    System.out.println(inputArray[1]+": not found");
 
 //                System.out.println("This is a simple echo program.");
-                continue;
+//                continue;
             }
 
             if(inputArray[0].equals("echo")){
