@@ -11,6 +11,16 @@ public class Main {
                 break;
             }
             String[] inputArray = input.split(" ");
+            if(inputArray[0].equals("type") && inputArray.length == 2){
+                if(inputArray[1].equals("echo")||inputArray[1].equals("exit")||inputArray[1].equals("type"))
+                    System.out.println(inputArray[1]+" is a shell builtin");
+                 else
+                    System.out.println(inputArray[1]+": not found");
+
+//                System.out.println("This is a simple echo program.");
+                continue;
+            }
+
             if(inputArray[0].equals("echo")){
                 for(int i = 1; i < inputArray.length; i++){
                     System.out.print(inputArray[i]);
