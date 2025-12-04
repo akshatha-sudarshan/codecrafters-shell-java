@@ -12,20 +12,18 @@ public class Main {
                 break;
             }
             String[] inputArray = input.split(" ");
-            if(inputArray[0].equals("type") && inputArray.length == 2){
-                if(inputArray[1].equals("echo")||inputArray[1].equals("exit")||inputArray[1].equals("type")){
-                    System.out.println(inputArray[1]+" is a shell builtin");
-                    continue;
-                }
-                 else{
+            if (inputArray[0].equals("type") && inputArray.length == 2) {
+                if (inputArray[1].equals("echo") || inputArray[1].equals("exit") || inputArray[1].equals("type")) {
+                    System.out.println(inputArray[1] + " is a shell builtin");
+//                    continue;
+                } else {
                     String executablePath = findExecutableOnPath(inputArray[1]);
                     if (executablePath != null) {
                         System.out.println(inputArray[1] + " is " + executablePath);
-                        continue;
-                    }
-                    else {
-                        System.out.println(inputArray[1]+": not found");
-                        continue;
+//                        continue;
+                    } else {
+                        System.out.println(inputArray[1] + ": not found");
+//                        continue;
                     }
                 }
 
@@ -33,10 +31,10 @@ public class Main {
 //                continue;
             }
 
-            if(inputArray[0].equals("echo")){
-                for(int i = 1; i < inputArray.length; i++){
+            if (inputArray[0].equals("echo")) {
+                for (int i = 1; i < inputArray.length; i++) {
                     System.out.print(inputArray[i]);
-                    if(i != inputArray.length - 1){
+                    if (i != inputArray.length - 1) {
                         System.out.print(" ");
                     }
                 }
