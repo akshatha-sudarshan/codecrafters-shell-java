@@ -1,4 +1,7 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Scanner;
 
 public class Main {
@@ -29,23 +32,25 @@ public class Main {
 
 //                System.out.println("This is a simple echo program.");
 //                continue;
-            }
-
-            else if (inputArray[0].equals("echo")) {
+            } else if (inputArray[0].equals("echo")) {
                 for (int i = 1; i < inputArray.length; i++) {
                     System.out.print(inputArray[i]);
                     if (i != inputArray.length - 1) {
                         System.out.print(" ");
                     }
                 }
-                System.out.println();
-                continue;
-            }
-            else
-                System.out.println(input + ": command not found");
-//            scanner.close();
-        }
+            } else {
+                String command = inputArray[0];
+                String executablePath = findExecutableOnPath(command);
+                if (executablePath != null) {
+                   invokeExecutable(executablePath, java.util.Arrays.copyOfRange(inputArray, 1, inputArray.length));
+                } else {
+                    System.out.println(command + ": command not found");
+                }
 
+            }
+
+        }
     }
 
     public static String findExecutableOnPath(String executableName) {
@@ -95,5 +100,48 @@ public class Main {
         }
 
         return null; // Executable not found in any PATH directory
+    }
+
+    public static void invokeExecutable(String executablePath, String... arguments) {
+        try {
+            // 1. Create a ProcessBuilder instance
+            // The first element is the command/executable path, followed by its arguments.
+            // We use a List/Array to handle arguments correctly.
+            java.util.List<String> command = new java.util.ArrayList<>();
+            command.add(executablePath);
+            for (String arg : arguments) {
+                command.add(arg);
+            }
+
+            ProcessBuilder builder = new ProcessBuilder(command);
+
+            // Optional: Redirect standard error to standard output
+            // This is useful so you don't miss error messages.
+            builder.redirectErrorStream(true);
+
+
+            // 2. Start the process
+            Process process = builder.start();
+
+            // 3. Read the output (stdout and stderr combined due to redirectErrorStream(true))
+            // We use a BufferedReader for efficient line-by-line reading.
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            StringBuilder output = new StringBuilder();
+
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append(System.lineSeparator());
+            }
+
+            // 4. Wait for the process to exit and get the exit code
+            int exitCode = process.waitFor();
+
+        } catch (IOException e) {
+            System.err.println("Error executing command: " + e.getMessage());
+        } catch (InterruptedException e) {
+            // This occurs if the current thread is interrupted while waiting for the process
+            Thread.currentThread().interrupt();
+            System.err.println("Process waiting interrupted: " + e.getMessage());
+        }
     }
 }
