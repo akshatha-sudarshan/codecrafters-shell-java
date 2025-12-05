@@ -125,13 +125,13 @@ public class Main {
 
             // 3. Read the output (stdout and stderr combined due to redirectErrorStream(true))
             // We use a BufferedReader for efficient line-by-line reading.
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            StringBuilder output = new StringBuilder();
-
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append(System.lineSeparator());
-            }
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//            String line;
+//            StringBuilder output = new StringBuilder();
+//
+//            while ((line = reader.readLine()) != null) {
+//                output.append(line).append(System.lineSeparator());
+//            }
 
             // 4. Wait for the process to exit and get the exit code
             int exitCode = process.waitFor();
