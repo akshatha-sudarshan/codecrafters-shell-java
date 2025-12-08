@@ -38,6 +38,7 @@ public class Main {
                     if (i != inputArray.length - 1) {
                         System.out.print(" ");
                     }
+                    System.out.println();
                 }
             } else {
                 String command = inputArray[0];
