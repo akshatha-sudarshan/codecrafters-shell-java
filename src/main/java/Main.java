@@ -44,8 +44,10 @@ public class Main {
                 String executablePath = findExecutableOnPath(command);
                 if (executablePath != null) {
                     String response = invokeExecutable(command, java.util.Arrays.copyOfRange(inputArray, 1, inputArray.length));
-                    if (response != null)
+                    if (response != null){
                         System.out.println(response);
+                        System.out.println();
+                    }
                 } else {
                     System.out.println(command + ": command not found");
                 }
