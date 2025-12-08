@@ -2,6 +2,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class Main {
@@ -40,12 +42,16 @@ public class Main {
                     }
                 }
                 System.out.println();
+            } else if (inputArray[0].equals("pwd")) {
+                Path absolutePath = Paths.get(".").toAbsolutePath().normalize();
+//                System.out.println(System.getProperty("user.dir"));
+                System.out.println(absolutePath.toString());
             } else {
                 String command = inputArray[0];
                 String executablePath = findExecutableOnPath(command);
                 if (executablePath != null) {
                     String response = invokeExecutable(command, java.util.Arrays.copyOfRange(inputArray, 1, inputArray.length));
-                    if (response != null){
+                    if (response != null) {
                         System.out.println(response);
 //                        System.out.println();
                     }
