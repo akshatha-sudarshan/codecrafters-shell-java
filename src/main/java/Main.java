@@ -18,51 +18,53 @@ public class Main {
             }
             String[] inputArray = input.split(" ");
             if (inputArray[0].equals("type") && inputArray.length == 2) {
-                if (inputArray[1].equals("echo") || inputArray[1].equals("exit") || inputArray[1].equals("type")) {
+                if (inputArray[1].equals("echo") || inputArray[1].equals("exit") || inputArray[1].equals("type")
+                        || inputArray[1].equals("pwd"))
                     System.out.println(inputArray[1] + " is a shell builtin");
 //                    continue;
+            } else {
+                String executablePath = findExecutableOnPath(inputArray[1]);
+                if (executablePath != null) {
+                    System.out.println(inputArray[1] + " is " + executablePath);
+//                        continue;
                 } else {
-                    String executablePath = findExecutableOnPath(inputArray[1]);
-                    if (executablePath != null) {
-                        System.out.println(inputArray[1] + " is " + executablePath);
+                    System.out.println(inputArray[1] + ": not found");
 //                        continue;
-                    } else {
-                        System.out.println(inputArray[1] + ": not found");
-//                        continue;
-                    }
                 }
+            }
 
 //                System.out.println("This is a simple echo program.");
 //                continue;
-            } else if (inputArray[0].equals("echo")) {
-                for (int i = 1; i < inputArray.length; i++) {
-                    System.out.print(inputArray[i]);
-                    if (i != inputArray.length - 1) {
-                        System.out.print(" ");
-                    }
+        } else if (inputArray[0].equals("echo")) {
+            for (int i = 1; i < inputArray.length; i++) {
+                System.out.print(inputArray[i]);
+                if (i != inputArray.length - 1) {
+                    System.out.print(" ");
                 }
-                System.out.println();
-            } else if (inputArray[0].equals("pwd")) {
-                Path absolutePath = Paths.get(".").toAbsolutePath().normalize();
+            }
+            System.out.println();
+        } else if (inputArray[0].equals("pwd")) {
+            Path absolutePath = Paths.get(".").toAbsolutePath().normalize();
 //                System.out.println(System.getProperty("user.dir"));
-                System.out.println(absolutePath.toString());
-            } else {
-                String command = inputArray[0];
-                String executablePath = findExecutableOnPath(command);
-                if (executablePath != null) {
-                    String response = invokeExecutable(command, java.util.Arrays.copyOfRange(inputArray, 1, inputArray.length));
-                    if (response != null) {
-                        System.out.println(response);
+            System.out.println(absolutePath.toString());
+        } else {
+            String command = inputArray[0];
+            String executablePath = findExecutableOnPath(command);
+            if (executablePath != null) {
+                String response = invokeExecutable(command, java.util.Arrays.copyOfRange(inputArray, 1, inputArray.length));
+                if (response != null) {
+                    System.out.println(response);
 //                        System.out.println();
-                    }
-                } else {
-                    System.out.println(command + ": command not found");
                 }
-
+            } else {
+                System.out.println(command + ": command not found");
             }
 
         }
+
     }
+
+}
 
     public static String findExecutableOnPath(String executableName) {
         // 1. Retrieve the PATH environment variable
