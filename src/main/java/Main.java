@@ -43,10 +43,10 @@ public class Main {
                 String command = inputArray[0];
                 String executablePath = findExecutableOnPath(command);
                 if (executablePath != null) {
-                    String response=invokeExecutable(command, java.util.Arrays.copyOfRange(inputArray, 1, inputArray.length));
-                    System.out.println(response);
-                }
-            else {
+                    String response = invokeExecutable(command, java.util.Arrays.copyOfRange(inputArray, 1, inputArray.length));
+                    if (response != null)
+                        System.out.println(response);
+                } else {
                     System.out.println(command + ": command not found");
                 }
 
@@ -137,7 +137,7 @@ public class Main {
 
             // 4. Wait for the process to exit and get the exit code
             int exitCode = process.waitFor();
-            String response= output.toString().trim();
+            String response = output.toString().trim();
             return response;
 //            System.out.println(output.toString());
 //            System.out.println("Process exited with code: " + exitCode);
@@ -149,5 +149,6 @@ public class Main {
             Thread.currentThread().interrupt();
             System.err.println("Process waiting interrupted: " + e.getMessage());
         }
+        return null;
     }
 }
