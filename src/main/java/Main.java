@@ -46,7 +46,7 @@ public class Main {
                     String response = invokeExecutable(command, java.util.Arrays.copyOfRange(inputArray, 1, inputArray.length));
                     if (response != null){
                         System.out.println(response);
-                        System.out.println();
+//                        System.out.println();
                     }
                 } else {
                     System.out.println(command + ": command not found");
