@@ -43,7 +43,8 @@ public class Main {
                 String command = inputArray[0];
                 String executablePath = findExecutableOnPath(command);
                 if (executablePath != null) {
-                   invokeExecutable(command, java.util.Arrays.copyOfRange(inputArray, 1, inputArray.length));
+                    String response=invokeExecutable(command, java.util.Arrays.copyOfRange(inputArray, 1, inputArray.length));
+                    System.out.println(response);
                 }
             else {
                     System.out.println(command + ": command not found");
@@ -103,7 +104,7 @@ public class Main {
         return null; // Executable not found in any PATH directory
     }
 
-    public static void invokeExecutable(String executablePath, String... arguments) {
+    public static String invokeExecutable(String executablePath, String... arguments) {
         try {
             // 1. Create a ProcessBuilder instance
             // The first element is the command/executable path, followed by its arguments.
@@ -136,8 +137,10 @@ public class Main {
 
             // 4. Wait for the process to exit and get the exit code
             int exitCode = process.waitFor();
-            System.out.println(output.toString());
-            System.out.println("Process exited with code: " + exitCode);
+            String response= output.toString().trim();
+            return response;
+//            System.out.println(output.toString());
+//            System.out.println("Process exited with code: " + exitCode);
 
         } catch (IOException e) {
             System.err.println("Error executing command: " + e.getMessage());
