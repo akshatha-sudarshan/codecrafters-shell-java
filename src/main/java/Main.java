@@ -45,9 +45,9 @@ public class Main {
 //                if (executablePath != null) {
                    invokeExecutable(command, java.util.Arrays.copyOfRange(inputArray, 1, inputArray.length));
 //                }
-            else {
-                    System.out.println(command + ": command not found");
-                }
+//            else {
+//                    System.out.println(command + ": command not found");
+//                }
 
             }
 
