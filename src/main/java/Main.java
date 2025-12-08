@@ -137,7 +137,7 @@ public class Main {
             // 4. Wait for the process to exit and get the exit code
             int exitCode = process.waitFor();
             System.out.println(output.toString());
-            return;
+            System.out.println("Process exited with code: " + exitCode);
 
         } catch (IOException e) {
             System.err.println("Error executing command: " + e.getMessage());
