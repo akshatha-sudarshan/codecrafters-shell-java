@@ -41,10 +41,11 @@ public class Main {
                 }
             } else {
                 String command = inputArray[0];
-                String executablePath = findExecutableOnPath(command);
-                if (executablePath != null) {
-                   invokeExecutable(executablePath, java.util.Arrays.copyOfRange(inputArray, 1, inputArray.length));
-                } else {
+//                String executablePath = findExecutableOnPath(command);
+//                if (executablePath != null) {
+                   invokeExecutable(command, java.util.Arrays.copyOfRange(inputArray, 1, inputArray.length));
+//                }
+            else {
                     System.out.println(command + ": command not found");
                 }
 
