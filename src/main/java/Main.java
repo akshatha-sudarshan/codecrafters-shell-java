@@ -57,7 +57,7 @@ public class Main {
                 if (dir.exists() && dir.isDirectory()) {
                     String newPath = dir.getCanonicalPath();
                     System.setProperty("user.dir", newPath);
-                    System.out.println(newPath);
+//                    System.out.println(newPath);
                 } else {
                     System.out.println("cd: " + inputArray[1] + ": No such file or directory");
                 }
