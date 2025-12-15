@@ -19,7 +19,7 @@ public class Main {
             String[] inputArray = input.split(" ");
             if (inputArray[0].equals("type") && inputArray.length == 2) {
                 if (inputArray[1].equals("echo") || inputArray[1].equals("exit") || inputArray[1].equals("type")
-                        || inputArray[1].equals("pwd")){
+                        || inputArray[1].equals("pwd")||inputArray[1].equals("cd")) {
                     System.out.println(inputArray[1] + " is a shell builtin");
 //                    continue;
             } else {
@@ -47,7 +47,23 @@ public class Main {
             Path absolutePath = Paths.get(".").toAbsolutePath().normalize();
 //                System.out.println(System.getProperty("user.dir"));
             System.out.println(absolutePath.toString());
-        } else {
+        } else if (inputArray[0].equals("cd")) {
+            if (inputArray.length == 1) {
+                String userHome = System.getProperty("user.home");
+                System.setProperty("user.dir", userHome);
+                System.out.println(userHome);
+            } else if (inputArray.length == 2) {
+                File dir = new File(inputArray[1]);
+                if (dir.exists() && dir.isDirectory()) {
+                    String newPath = dir.getCanonicalPath();
+                    System.setProperty("user.dir", newPath);
+                    System.out.println(newPath);
+                } else {
+                    System.out.println("cd: " + inputArray[1] + ": No such file or directory");
+                }
+            } else {
+                System.out.println("cd: too many arguments");}
+            } else {
             String command = inputArray[0];
             String executablePath = findExecutableOnPath(command);
             if (executablePath != null) {
