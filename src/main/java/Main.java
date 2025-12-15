@@ -4,83 +4,106 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
+
+    // Instantiate the persistent state manager once
+    private final ShellState shellState = new ShellState();
+
     public static void main(String[] args) throws Exception {
-        // TODO: Uncomment the code below to pass the first stage
+        new Main().startShell();
+    }
+
+    public void startShell() throws Exception {
+        Scanner scanner = new Scanner(System.in);
+        String input;
+
         for (; ; ) {
-            System.out.print("$ ");
-            Scanner scanner = new Scanner(System.in);
-            String input = scanner.nextLine();
+            // The prompt uses the current directory from the persistent state
+            System.out.print(shellState.getCurrentPath() + "$ ");
+
+            if (!scanner.hasNextLine()) break;
+            input = scanner.nextLine();
+
             if (input.equals("exit")) {
                 break;
             }
-            String[] inputArray = input.split(" ");
-            if (inputArray[0].equals("type") && inputArray.length == 2) {
-                if (inputArray[1].equals("echo") || inputArray[1].equals("exit") || inputArray[1].equals("type")
-                        || inputArray[1].equals("pwd")||inputArray[1].equals("cd")) {
-                    System.out.println(inputArray[1] + " is a shell builtin");
-//                    continue;
-            } else {
-                String executablePath = findExecutableOnPath(inputArray[1]);
-                if (executablePath != null) {
-                    System.out.println(inputArray[1] + " is " + executablePath);
-//                        continue;
-                } else {
-                    System.out.println(inputArray[1] + ": not found");
-//                        continue;
-                }
-            }
 
-//                System.out.println("This is a simple echo program.");
-//                continue;
-        } else if (inputArray[0].equals("echo")) {
-            for (int i = 1; i < inputArray.length; i++) {
-                System.out.print(inputArray[i]);
-                if (i != inputArray.length - 1) {
-                    System.out.print(" ");
-                }
-            }
-            System.out.println();
-        } else if (inputArray[0].equals("pwd")) {
-            Path absolutePath = Paths.get(".").toAbsolutePath().normalize();
-//                System.out.println(System.getProperty("user.dir"));
-            System.out.println(absolutePath.toString());
-        } else if (inputArray[0].equals("cd")) {
-            if (inputArray.length == 1) {
-                String userHome = System.getProperty("user.home");
-                System.setProperty("user.dir", userHome);
-                System.out.println(userHome);
-            } else if (inputArray.length == 2) {
-                File dir = new File(inputArray[1]);
-                if (dir.exists() && dir.isDirectory()) {
-                    String newPath = dir.getCanonicalPath();
-                    System.setProperty("user.dir", newPath);
-//                    System.out.println(newPath);
-                } else {
-                    System.out.println("cd: " + inputArray[1] + ": No such file or directory");
-                }
-            } else {
-                System.out.println("cd: too many arguments");}
-            } else {
+            // --- Command Parsing ---
+            String[] inputArray = input.trim().split("\\s+");
+            if (inputArray.length == 0 || inputArray[0].isEmpty()) continue;
+
             String command = inputArray[0];
-            String executablePath = findExecutableOnPath(command);
-            if (executablePath != null) {
-                String response = invokeExecutable(command, java.util.Arrays.copyOfRange(inputArray, 1, inputArray.length));
-                if (response != null) {
-                    System.out.println(response);
-//                        System.out.println();
-                }
-            } else {
-                System.out.println(command + ": command not found");
+            String args = inputArray.length > 1 ? inputArray[1] : "";
+            String[] commandArgs = Arrays.copyOfRange(inputArray, 1, inputArray.length);
+
+            // --- Command Execution ---
+            switch (command) {
+                case "echo":
+                    // Your original echo logic
+                    for (int i = 1; i < inputArray.length; i++) {
+                        System.out.print(inputArray[i]);
+                        if (i != inputArray.length - 1) {
+                            System.out.print(" ");
+                        }
+                    }
+                    System.out.println();
+                    break;
+                case "pwd":
+                    // NEW PWD: Uses the persistent state
+                    System.out.println(shellState.getCurrentPath());
+                    break;
+                case "cd":
+                    // NEW CD: Uses the persistent state manager
+                    if (inputArray.length <= 2) {
+                        String targetPath = inputArray.length == 1 ? "" : inputArray[1]; // Empty for `cd` with no args
+
+                        if (!shellState.changeDirectory(targetPath)) {
+                            System.out.println("cd: " + targetPath + ": No such file or directory");
+                        }
+                    } else {
+                        System.out.println("cd: too many arguments");
+                    }
+                    break;
+                case "type":
+                    // Your original type logic (modified slightly for clean break)
+                    if (inputArray.length == 2) {
+                        String target = inputArray[1];
+                        if (target.equals("echo") || target.equals("exit") || target.equals("type")
+                                || target.equals("pwd") || target.equals("cd")) {
+                            System.out.println(target + " is a shell builtin");
+                        } else {
+                            String executablePath = findExecutableOnPath(target);
+                            if (executablePath != null) {
+                                System.out.println(target + " is " + executablePath);
+                            } else {
+                                System.out.println(target + ": not found");
+                            }
+                        }
+                    } else {
+                        System.out.println("type: too many arguments");
+                    }
+                    break;
+                default:
+                    // External Command Execution
+                    String executablePath = findExecutableOnPath(command);
+                    if (executablePath != null) {
+                        // Pass the current working directory to the invoke method
+                        String response = invokeExecutable(executablePath, shellState.getCurrentPath(), commandArgs);
+                        if (response != null && !response.isEmpty()) {
+                            System.out.println(response);
+                        }
+                    } else {
+                        System.out.println(command + ": command not found");
+                    }
+                    break;
             }
-
         }
-
+        scanner.close();
     }
-
-}
 
     public static String findExecutableOnPath(String executableName) {
         // 1. Retrieve the PATH environment variable
@@ -131,29 +154,23 @@ public class Main {
         return null; // Executable not found in any PATH directory
     }
 
-    public static String invokeExecutable(String executablePath, String... arguments) {
+    public String invokeExecutable(String executablePath, String workingDirectory, String... arguments) {
         try {
-            // 1. Create a ProcessBuilder instance
-            // The first element is the command/executable path, followed by its arguments.
-            // We use a List/Array to handle arguments correctly.
-            java.util.List<String> command = new java.util.ArrayList<>();
+            // ... (ProcessBuilder command list creation remains the same)
+            java.util.List<String> command = new ArrayList<>();
             command.add(executablePath);
-            for (String arg : arguments) {
-                command.add(arg);
-            }
+            command.addAll(Arrays.asList(arguments));
 
             ProcessBuilder builder = new ProcessBuilder(command);
 
-            // Optional: Redirect standard error to standard output
-            // This is useful so you don't miss error messages.
+            // CRITICAL CHANGE: Set the working directory for the external process
+            builder.directory(new File(workingDirectory));
             builder.redirectErrorStream(true);
 
-
-            // 2. Start the process
+            // ... (rest of the process start and output reading logic remains the same)
             Process process = builder.start();
+            // ... (output reading and process.waitFor() logic)
 
-            // 3. Read the output (stdout and stderr combined due to redirectErrorStream(true))
-            // We use a BufferedReader for efficient line-by-line reading.
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             StringBuilder output = new StringBuilder();
@@ -162,20 +179,13 @@ public class Main {
                 output.append(line).append(System.lineSeparator());
             }
 
-            // 4. Wait for the process to exit and get the exit code
             int exitCode = process.waitFor();
             String response = output.toString().trim();
             return response;
-//            System.out.println(output.toString());
-//            System.out.println("Process exited with code: " + exitCode);
 
-        } catch (IOException e) {
-            System.err.println("Error executing command: " + e.getMessage());
-        } catch (InterruptedException e) {
-            // This occurs if the current thread is interrupted while waiting for the process
-            Thread.currentThread().interrupt();
-            System.err.println("Process waiting interrupted: " + e.getMessage());
+        } catch (IOException | InterruptedException e) {
+            // Handle error (e.g., if the file cannot be executed)
+            return null;
         }
-        return null;
     }
 }
