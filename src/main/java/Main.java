@@ -89,7 +89,7 @@ public class Main {
                     break;
                 default:
                     // External Command Execution
-                    String executablePath = findExecutableOnPath(command);
+                    String executablePath = findExecutableOnPath( inputArray[0]);
                     if (executablePath != null) {
                         // Pass the current working directory to the invoke method
                         String response = invokeExecutable(executablePath, shellState.getCurrentPath(), commandArgs);
