@@ -27,7 +27,7 @@ public class ShellState {
 
         // Handle cd with no arguments: typically goes to the home directory.
         if (targetPathString == null || targetPathString.isEmpty() || targetPathString.equals("~")) {
-            resolvedPath = Paths.get(System.getProperty("user.home")).normalize();
+            resolvedPath = Paths.get(System.getProperty("user.home"));
         } else {
             // 1. Resolve the input path against the current internal directory.
             resolvedPath = currentDirectory.resolve(targetPathString).normalize();
