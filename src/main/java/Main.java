@@ -23,8 +23,8 @@ public class Main {
 
         for (; ; ) {
             // The prompt uses the current directory from the persistent state
-            System.out.print(shellState.getCurrentPath() + "$ ");
-
+//            System.out.print(shellState.getCurrentPath() + "$ ");
+            System.out.print("$ ");
             if (!scanner.hasNextLine()) break;
             input = scanner.nextLine();
 
@@ -60,7 +60,7 @@ public class Main {
                     // NEW CD: Uses the persistent state manager
                     if (inputArray.length <= 2) {
                         String targetPath = inputArray.length == 1 ? "" : inputArray[1]; // Empty for `cd` with no args
-                        System.out.println("Changing directory to: " + targetPath);
+//                        System.out.println("Changing directory to: " + targetPath);
                         if (!shellState.changeDirectory(targetPath)) {
                             System.out.println("cd: " + targetPath + ": No such file or directory");
                         }
