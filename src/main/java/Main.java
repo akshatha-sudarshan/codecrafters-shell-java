@@ -195,23 +195,38 @@ public class Main {
         }
     }
 
-    public static List<String> parseArguments(String input) {
-        List<String> tokens = new ArrayList<>();
-        // Regex explanation:
-        // '([^']*)'  -> Matches anything inside single quotes, captures content in group 1
-        // (\S+)      -> Matches any non-whitespace sequence, captures content in group 2
-        Pattern pattern = Pattern.compile("'([^']*)'|(\\S+)");
-        Matcher matcher = pattern.matcher(input);
+    public static java.util.List<String> parseArguments(String input) {
+        java.util.List<String> args = new java.util.ArrayList<>();
+        StringBuilder currentArg = new StringBuilder();
+        boolean inSingleQuotes = false;
+        boolean insideArg = false;
 
-        while (matcher.find()) {
-            if (matcher.group(1) != null) {
-                // It was a quoted string; add the content without the quotes
-                tokens.add(matcher.group(1));
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+
+            if (c == '\'') {
+                // TOGGLE mode: don't append the quote itself
+                inSingleQuotes = !inSingleQuotes;
+                insideArg = true;
+            } else if (Character.isWhitespace(c) && !inSingleQuotes) {
+                // Space outside of quotes finishes the current word
+                if (insideArg) {
+                    args.add(currentArg.toString());
+                    currentArg.setLength(0);
+                    insideArg = false;
+                }
             } else {
-                // It was a regular unquoted word
-                tokens.add(matcher.group(2));
+                // Regular character or space INSIDE quotes
+                currentArg.append(c);
+                insideArg = true;
             }
         }
-        return tokens;
+
+        // Add the final piece
+        if (insideArg) {
+            args.add(currentArg.toString());
+        }
+
+        return args;
     }
 }
