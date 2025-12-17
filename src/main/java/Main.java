@@ -2,11 +2,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main {
 
@@ -33,20 +34,23 @@ public class Main {
             }
 
             // --- Command Parsing ---
-            String[] inputArray = input.trim().split("\\s+");
-            if (inputArray.length == 0 || inputArray[0].isEmpty()) continue;
+//            String[] inputArray = input.trim().split("\\s+");
+           List<String> parsedTokens = parseArguments(input);
+            if (parsedTokens.size() == 0 || parsedTokens.get(0).isEmpty()) continue;
 
-            String command = inputArray[0];
-            String args = inputArray.length > 1 ? inputArray[1] : "";
-            String[] commandArgs = Arrays.copyOfRange(inputArray, 1, inputArray.length);
+            String command = parsedTokens.get(0);
+            String args = parsedTokens.size() > 1 ? parsedTokens.get(1) : "";
+//            String[] commandArgs = Arrays.copyOfRange(parsedTokens, 1, parsedTokens.size());
+            List<String> commandArgs = parsedTokens.size() > 1 ? parsedTokens.subList(1, parsedTokens.size()) : new ArrayList<>();
+
 
             // --- Command Execution ---
             switch (command) {
                 case "echo":
                     // Your original echo logic
-                    for (int i = 1; i < inputArray.length; i++) {
-                        System.out.print(inputArray[i]);
-                        if (i != inputArray.length - 1) {
+                    for (int i = 1; i < parsedTokens.size(); i++) {
+                        System.out.print(parsedTokens.get(i));
+                        if (i != parsedTokens.size() - 1) {
                             System.out.print(" ");
                         }
                     }
@@ -58,8 +62,8 @@ public class Main {
                     break;
                 case "cd":
                     // NEW CD: Uses the persistent state manager
-                    if (inputArray.length <= 2) {
-                        String targetPath = inputArray.length == 1 ? "" : inputArray[1]; // Empty for `cd` with no args
+                    if (parsedTokens.size() <= 2) {
+                        String targetPath = parsedTokens.size() == 1 ? "" : parsedTokens.get(1); // Empty for `cd` with no args
 //                        System.out.println("Changing directory to: " + targetPath);
                         if (!shellState.changeDirectory(targetPath)) {
                             System.out.println("cd: " + targetPath + ": No such file or directory");
@@ -70,8 +74,8 @@ public class Main {
                     break;
                 case "type":
                     // Your original type logic (modified slightly for clean break)
-                    if (inputArray.length == 2) {
-                        String target = inputArray[1];
+                    if (parsedTokens.size() == 2) {
+                        String target =parsedTokens.get(1);
                         if (target.equals("echo") || target.equals("exit") || target.equals("type")
                                 || target.equals("pwd") || target.equals("cd")) {
                             System.out.println(target + " is a shell builtin");
@@ -154,12 +158,14 @@ public class Main {
         return null; // Executable not found in any PATH directory
     }
 
-    public String invokeExecutable(String executablePath, String workingDirectory, String... arguments) {
+    public String invokeExecutable(String executablePath, String workingDirectory,
+//                                   String... arguments
+    List<String> arguments) {
         try {
             // ... (ProcessBuilder command list creation remains the same)
             java.util.List<String> command = new ArrayList<>();
             command.add(executablePath);
-            command.addAll(Arrays.asList(arguments));
+            command.addAll(arguments);
 
             ProcessBuilder builder = new ProcessBuilder(command);
 
@@ -187,5 +193,25 @@ public class Main {
             // Handle error (e.g., if the file cannot be executed)
             return null;
         }
+    }
+
+    public static List<String> parseArguments(String input) {
+        List<String> tokens = new ArrayList<>();
+        // Regex explanation:
+        // '([^']*)'  -> Matches anything inside single quotes, captures content in group 1
+        // (\S+)      -> Matches any non-whitespace sequence, captures content in group 2
+        Pattern pattern = Pattern.compile("'([^']*)'|(\\S+)");
+        Matcher matcher = pattern.matcher(input);
+
+        while (matcher.find()) {
+            if (matcher.group(1) != null) {
+                // It was a quoted string; add the content without the quotes
+                tokens.add(matcher.group(1));
+            } else {
+                // It was a regular unquoted word
+                tokens.add(matcher.group(2));
+            }
+        }
+        return tokens;
     }
 }
