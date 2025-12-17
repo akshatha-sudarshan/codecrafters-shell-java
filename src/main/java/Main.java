@@ -209,11 +209,11 @@ public class Main {
                 insideDoubleQuote = !insideDoubleQuote;
                 insideArg = true;
             }
-            else if (c == '\''&&!insideDoubleQuote) {
+            else if (c == '\'') {
                 // TOGGLE mode: don't append the quote itself
                 inSingleQuotes = !inSingleQuotes;
                 insideArg = true;
-            } else if ((Character.isWhitespace(c) && !inSingleQuotes)||(Character.isWhitespace(c) && !insideDoubleQuote)) {
+            } else if ((Character.isWhitespace(c) && !inSingleQuotes && !insideDoubleQuote)||(Character.isWhitespace(c) && !insideDoubleQuote && !inSingleQuotes)) {
                 // Space outside of quotes finishes the current word
                 if (insideArg) {
                     args.add(currentArg.toString());
