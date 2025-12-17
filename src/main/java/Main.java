@@ -213,7 +213,7 @@ public class Main {
                 // TOGGLE mode: don't append the quote itself
                 inSingleQuotes = !inSingleQuotes;
                 insideArg = true;
-            } else if (Character.isWhitespace(c) && !inSingleQuotes) {
+            } else if ((Character.isWhitespace(c) && !inSingleQuotes)||(Character.isWhitespace(c) && !insideDoubleQuote)) {
                 // Space outside of quotes finishes the current word
                 if (insideArg) {
                     args.add(currentArg.toString());
