@@ -200,11 +200,16 @@ public class Main {
         StringBuilder currentArg = new StringBuilder();
         boolean inSingleQuotes = false;
         boolean insideArg = false;
+        boolean insideDoubleQuote = false;
 
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
-
-            if (c == '\''||c=='\"') {
+            if(c=='\"'){
+                // TOGGLE mode: don't append the quote itself
+                insideDoubleQuote = !insideDoubleQuote;
+                insideArg = true;
+            }
+            else if (c == '\''&&!insideDoubleQuote) {
                 // TOGGLE mode: don't append the quote itself
                 inSingleQuotes = !inSingleQuotes;
                 insideArg = true;
