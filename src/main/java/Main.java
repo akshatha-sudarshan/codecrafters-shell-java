@@ -214,6 +214,22 @@ public class Main {
                     continue; // Move to the next character in the string
                 }
             }
+            else if(c=='\\'&&insideDoubleQuote){
+                if (i + 1 < input.length()) {
+                    char nextChar = input.charAt(i + 1);
+                    // Only certain characters are escaped inside double quotes
+                    if (nextChar == '\"' || nextChar == '\\' )
+//                            || nextChar == '$' || nextChar == '`')
+                    {
+                        currentArg.append(nextChar);
+                        i++; // Skip the next character in the next loop iteration
+                    } else {
+                        currentArg.append(c); // Keep the backslash if not escaping a special char
+                    }
+                    insideArg = true;
+                    continue; // Move to the next character in the string
+                }
+            }
             if(c=='\"'&&!inSingleQuotes){
                 // TOGGLE mode: don't append the quote itself
                 insideDoubleQuote = !insideDoubleQuote;
