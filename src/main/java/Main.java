@@ -204,6 +204,16 @@ public class Main {
 
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
+
+            if (c == '\\' && !inSingleQuotes && !insideDoubleQuote) {
+                if (i + 1 < input.length()) {
+                    // Peek at the next character and append it directly
+                    currentArg.append(input.charAt(i + 1));
+                    i++; // Skip the next character in the next loop iteration
+                    insideArg = true;
+                    continue; // Move to the next character in the string
+                }
+            }
             if(c=='\"'&&!inSingleQuotes){
                 // TOGGLE mode: don't append the quote itself
                 insideDoubleQuote = !insideDoubleQuote;
