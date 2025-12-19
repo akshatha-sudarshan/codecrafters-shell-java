@@ -26,6 +26,7 @@ public class Main {
             // The prompt uses the current directory from the persistent state
 //            System.out.print(shellState.getCurrentPath() + "$ ");
             System.out.print("$ ");
+
             if (!scanner.hasNextLine()) break;
             input = scanner.nextLine();
 
@@ -35,77 +36,29 @@ public class Main {
 
             // --- Command Parsing ---
 //            String[] inputArray = input.trim().split("\\s+");
-           List<String> parsedTokens = parseArguments(input);
+            List<String> parsedTokens = parseArguments(input);
             if (parsedTokens.size() == 0 || parsedTokens.get(0).isEmpty()) continue;
 
             String command = parsedTokens.get(0);
             String args = parsedTokens.size() > 1 ? parsedTokens.get(1) : "";
 //            String[] commandArgs = Arrays.copyOfRange(parsedTokens, 1, parsedTokens.size());
             List<String> commandArgs = parsedTokens.size() > 1 ? parsedTokens.subList(1, parsedTokens.size()) : new ArrayList<>();
-
-
-            // --- Command Execution ---
-            switch (command) {
-                case "echo":
-                    // Your original echo logic
-                    for (int i = 1; i < parsedTokens.size(); i++) {
-                        System.out.print(parsedTokens.get(i));
-                        if (i != parsedTokens.size() - 1) {
-                            System.out.print(" ");
-                        }
+            String output = commandExecution(parsedTokens, command, commandArgs);
+            if (parsedTokens.get(2).equals(">") || parsedTokens.get(2).equals("1>")) {
+                if (parsedTokens.size() >= 4) {
+                    String fileName = parsedTokens.get(3);
+                    try {
+                        java.nio.file.Files.writeString(java.nio.file.Paths.get(shellState.getCurrentPath(), fileName), output);
+                    } catch (IOException e) {
+                        System.out.println("Error writing to file: " + e.getMessage());
                     }
-                    System.out.println();
-                    break;
-                case "pwd":
-                    // NEW PWD: Uses the persistent state
-                    System.out.println(shellState.getCurrentPath());
-                    break;
-                case "cd":
-                    // NEW CD: Uses the persistent state manager
-                    if (parsedTokens.size() <= 2) {
-                        String targetPath = parsedTokens.size() == 1 ? "" : parsedTokens.get(1); // Empty for `cd` with no args
-//                        System.out.println("Changing directory to: " + targetPath);
-                        if (!shellState.changeDirectory(targetPath)) {
-                            System.out.println("cd: " + targetPath + ": No such file or directory");
-                        }
-                    } else {
-                        System.out.println("cd: too many arguments");
-                    }
-                    break;
-                case "type":
-                    // Your original type logic (modified slightly for clean break)
-                    if (parsedTokens.size() == 2) {
-                        String target =parsedTokens.get(1);
-                        if (target.equals("echo") || target.equals("exit") || target.equals("type")
-                                || target.equals("pwd") || target.equals("cd")) {
-                            System.out.println(target + " is a shell builtin");
-                        } else {
-                            String executablePath = findExecutableOnPath(target);
-                            if (executablePath != null) {
-                                System.out.println(target + " is " + executablePath);
-                            } else {
-                                System.out.println(target + ": not found");
-                            }
-                        }
-                    } else {
-                        System.out.println("type: too many arguments");
-                    }
-                    break;
-                default:
-                    // External Command Execution
-                    String executablePath = findExecutableOnPath(command);
-                    if (executablePath != null) {
-                        // Pass the current working directory to the invoke method
-                        String response = invokeExecutable(command, shellState.getCurrentPath(), commandArgs);
-                        if (response != null && !response.isEmpty()) {
-                            System.out.println(response);
-                        }
-                    } else {
-                        System.out.println(command + ": command not found");
-                    }
-                    break;
+                } else {
+                    System.out.println("Syntax error: No file specified for output redirection.");
+                }
             }
+
         }
+
         scanner.close();
     }
 
@@ -160,7 +113,7 @@ public class Main {
 
     public String invokeExecutable(String executablePath, String workingDirectory,
 //                                   String... arguments
-    List<String> arguments) {
+                                   List<String> arguments) {
         try {
             // ... (ProcessBuilder command list creation remains the same)
             java.util.List<String> command = new ArrayList<>();
@@ -213,12 +166,11 @@ public class Main {
                     insideArg = true;
                     continue; // Move to the next character in the string
                 }
-            }
-            else if(c=='\\'&&insideDoubleQuote){
+            } else if (c == '\\' && insideDoubleQuote) {
                 if (i + 1 < input.length()) {
                     char nextChar = input.charAt(i + 1);
                     // Only certain characters are escaped inside double quotes
-                    if (nextChar == '\"' || nextChar == '\\' )
+                    if (nextChar == '\"' || nextChar == '\\')
 //                            || nextChar == '$' || nextChar == '`')
                     {
                         currentArg.append(nextChar);
@@ -230,16 +182,15 @@ public class Main {
                     continue; // Move to the next character in the string
                 }
             }
-            if(c=='\"'&&!inSingleQuotes){
+            if (c == '\"' && !inSingleQuotes) {
                 // TOGGLE mode: don't append the quote itself
                 insideDoubleQuote = !insideDoubleQuote;
                 insideArg = true;
-            }
-            else if (c == '\''&&!insideDoubleQuote) {
+            } else if (c == '\'' && !insideDoubleQuote) {
                 // TOGGLE mode: don't append the quote itself
                 inSingleQuotes = !inSingleQuotes;
                 insideArg = true;
-            } else if ((Character.isWhitespace(c) && !inSingleQuotes && !insideDoubleQuote)||(Character.isWhitespace(c) && !insideDoubleQuote && !inSingleQuotes)) {
+            } else if ((Character.isWhitespace(c) && !inSingleQuotes && !insideDoubleQuote) || (Character.isWhitespace(c) && !insideDoubleQuote && !inSingleQuotes)) {
                 // Space outside of quotes finishes the current word
                 if (insideArg) {
                     args.add(currentArg.toString());
@@ -259,5 +210,82 @@ public class Main {
         }
 
         return args;
+    }
+
+    public String commandExecution(List<String> parsedTokens, String command, List<String> commandArgs) {
+        String output = "";
+        // --- Command Execution ---
+        switch (command) {
+            case "echo":
+                // Your original echo logic
+                for (int i = 1; i < parsedTokens.size(); i++) {
+//                        System.out.print(parsedTokens.get(i));
+                    output += parsedTokens.get(i);
+                    if (i != parsedTokens.size() - 1) {
+//                            System.out.print(" ");
+                        output += " ";
+                    }
+                }
+                System.out.println();
+                break;
+            case "pwd":
+                // NEW PWD: Uses the persistent state
+//                    System.out.println(shellState.getCurrentPath());
+                output = shellState.getCurrentPath();
+                break;
+            case "cd":
+                // NEW CD: Uses the persistent state manager
+                if (parsedTokens.size() <= 2) {
+                    String targetPath = parsedTokens.size() == 1 ? "" : parsedTokens.get(1); // Empty for `cd` with no args
+//                        System.out.println("Changing directory to: " + targetPath);
+                    if (!shellState.changeDirectory(targetPath)) {
+//                            System.out.println("cd: " + targetPath + ": No such file or directory");
+                        output = "cd: " + targetPath + ": No such file or directory";
+                    }
+                } else {
+//                        System.out.println("cd: too many arguments");
+                    output = "cd: too many arguments";
+                }
+                break;
+            case "type":
+                // Your original type logic (modified slightly for clean break)
+                if (parsedTokens.size() == 2) {
+                    String target = parsedTokens.get(1);
+                    if (target.equals("echo") || target.equals("exit") || target.equals("type")
+                            || target.equals("pwd") || target.equals("cd")) {
+//                            System.out.println(target + " is a shell builtin");
+                        output = target + " is a shell builtin";
+                    } else {
+                        String executablePath = findExecutableOnPath(target);
+                        if (executablePath != null) {
+//                                System.out.println(target + " is " + executablePath);
+                            output = target + " is " + executablePath;
+                        } else {
+//                                System.out.println(target + ": not found");
+                            output = target + ": not found";
+                        }
+                    }
+                } else {
+//                        System.out.println("type: too many arguments");
+                    output = "type: too many arguments";
+                }
+                break;
+            default:
+                // External Command Execution
+                String executablePath = findExecutableOnPath(command);
+                if (executablePath != null) {
+                    // Pass the current working directory to the invoke method
+                    String response = invokeExecutable(command, shellState.getCurrentPath(), commandArgs);
+                    if (response != null && !response.isEmpty()) {
+//                            System.out.println(response);
+                        output = response;
+                    }
+                } else {
+//                        System.out.println(command + ": command not found");
+                    output = command + ": command not found";
+                }
+                break;
+        }
+        return output;
     }
 }
