@@ -45,11 +45,23 @@ public class Main {
             List<String> commandArgs = parsedTokens.size() > 1 ? parsedTokens.subList(1, parsedTokens.size()) : new ArrayList<>();
             String output = commandExecution(parsedTokens, command, commandArgs);
             // --- Output Redirection Handling ---
-            Boolean redirectionExists=redirectionExists(input);
+            Boolean redirectionExists = redirectionExists(input);
+
             if (redirectionExists) {
                 if (parsedTokens.size() >= 4) {
-                    String fileName = parsedTokens.get(3);
+//                    String fileName = parsedTokens.get(3);
+                    String delimiter = "> ";
+                    int index = input.indexOf(delimiter);
+                    String fileName = "";
+                    if (index != -1) {
+                        // index + 2 to skip the '>' and the ' '
+                        fileName = input.substring(index + delimiter.length()).trim();
+                    }
                     try {
+                        if (!fileName.isEmpty()) {
+                            System.out.println("Syntax error: No file specified for output redirection.");
+                            continue;
+                        }
                         java.nio.file.Files.writeString(java.nio.file.Paths.get(shellState.getCurrentPath(), fileName), output);
                     } catch (IOException e) {
                         System.out.println("Error writing to file: " + e.getMessage());
@@ -291,7 +303,7 @@ public class Main {
         return output;
     }
 
-    public Boolean redirectionExists(String input){
+    public Boolean redirectionExists(String input) {
         Pattern pattern = Pattern.compile("\\s*(>|1>)\\s*\\S+\\s*$");
         Matcher matcher = pattern.matcher(input);
         return matcher.find();
