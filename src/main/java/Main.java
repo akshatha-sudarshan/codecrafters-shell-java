@@ -44,7 +44,9 @@ public class Main {
 //            String[] commandArgs = Arrays.copyOfRange(parsedTokens, 1, parsedTokens.size());
             List<String> commandArgs = parsedTokens.size() > 1 ? parsedTokens.subList(1, parsedTokens.size()) : new ArrayList<>();
             String output = commandExecution(parsedTokens, command, commandArgs);
-            if (parsedTokens.get(2).equals(">") || parsedTokens.get(2).equals("1>")) {
+            // --- Output Redirection Handling ---
+            Boolean redirectionExists=redirectionExists(input);
+            if (redirectionExists) {
                 if (parsedTokens.size() >= 4) {
                     String fileName = parsedTokens.get(3);
                     try {
@@ -287,5 +289,11 @@ public class Main {
                 break;
         }
         return output;
+    }
+
+    public Boolean redirectionExists(String input){
+        Pattern pattern = Pattern.compile("\\s*(>|1>)\\s*\\S+\\s*$");
+        Matcher matcher = pattern.matcher(input);
+        return matcher.find();
     }
 }
