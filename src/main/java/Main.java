@@ -55,8 +55,7 @@ public class Main {
                     String fileName = "";
                     if (index != -1) {
                         // index + 2 to skip the '>' and the ' '
-//                        fileName = input.substring(index + delimiter.length()).trim();
-                        fileName=parsedTokens.get(index+1);
+                        fileName = input.substring(index + delimiter.length()).trim();
                     }
                     try {
                         if (!fileName.isEmpty()) {
