@@ -3,6 +3,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -58,14 +61,20 @@ public class Main {
                         // index + 2 to skip the '>' and the ' '
 //                        fileName = input.substring(index + delimiter.length()).trim();
                         fileName=parsedTokens.getLast();
-                        System.out.print("name = "+fileName);
 //                    }
                     try {
                         if (fileName.isEmpty()) {
                             System.out.println("Syntax error44: No file specified for output redirection.");
                             continue;
                         }
-                        java.nio.file.Files.writeString(java.nio.file.Paths.get(shellState.getCurrentPath(), fileName), output);
+                        Path path = Paths.get(fileName);
+                        // 1. Check if parent directory exists; if not, create it
+                        if (path.getParent() != null) {
+                            Files.createDirectories(path.getParent());
+                        }
+                        // 2. Now you can safely write to the file
+                        Files.writeString(path, output);
+//                        java.nio.file.Files.writeString(java.nio.file.Paths.get(shellState.getCurrentPath(), fileName), output);
                     } catch (IOException e) {
                         System.out.println("Error writing to file: " + e.getMessage());
                     }
