@@ -253,7 +253,7 @@ public class Main {
                         output += " ";
                     }
                 }
-                System.out.println();
+//                System.out.println();
                 break;
             case "pwd":
                 // NEW PWD: Uses the persistent state
