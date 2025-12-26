@@ -58,7 +58,7 @@ public class Main {
                         fileName = input.substring(index + delimiter.length()).trim();
                     }
                     try {
-                        if (fileName.isEmpty()) {
+                        if (!fileName.isEmpty()) {
                             System.out.println("Syntax error: No file specified for output redirection.");
                             continue;
                         }
