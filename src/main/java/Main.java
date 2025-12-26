@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
 
@@ -46,44 +48,85 @@ public class Main {
             String args = parsedTokens.size() > 1 ? parsedTokens.get(1) : "";
 //            String[] commandArgs = Arrays.copyOfRange(parsedTokens, 1, parsedTokens.size());
             List<String> commandArgs = parsedTokens.size() > 1 ? parsedTokens.subList(1, parsedTokens.size()) : new ArrayList<>();
-            String output = commandExecution(parsedTokens, command, commandArgs);
+
             // --- Output Redirection Handling ---
-            Boolean redirectionExists = redirectionExists(commandArgs);
-
-            if (redirectionExists) {
-                if (parsedTokens.size() >= 4) {
-//                    String fileName = parsedTokens.get(3);
-
-                    String delimiter = "> ";
-//                    int index = parsedTokens.indexOf(delimiter);
-                    String fileName = "";
-//                    if (index != -1) {
-                        // index + 2 to skip the '>' and the ' '
-//                        fileName = input.substring(index + delimiter.length()).trim();
-                        fileName=parsedTokens.getLast();
-//                    }
-                    try {
-                        if (fileName.isEmpty()) {
-                            System.out.println("Syntax error44: No file specified for output redirection.");
-                            continue;
-                        }
-                        Path path = Paths.get(fileName);
-                        // 1. Check if parent directory exists; if not, create it
-                        if (path.getParent() != null) {
-                            Files.createDirectories(path.getParent());
-                        }
-                        // 2. Now you can safely write to the file
-                        System.out.println("out= "+output);
-                        Files.writeString(path, output);
-//                        java.nio.file.Files.writeString(java.nio.file.Paths.get(shellState.getCurrentPath(), fileName), output);
-                    } catch (IOException e) {
-                        System.out.println("Error writing to file: " + e.getMessage());
-                    }
-                }
-                else {
-                    System.out.println("Syntax error1: No file specified for output redirection.");
+            int redirectionIndex = -1;
+            for (int i = 0; i < parsedTokens.size(); i++) {
+                if (parsedTokens.get(i).equals(">") || parsedTokens.get(i).equals("1>")) {
+                    redirectionIndex = i;
+                    break;
                 }
             }
+            String fileName = null;
+            List<String> actualArgs;
+            if (redirectionIndex != -1 && redirectionIndex + 1 < parsedTokens.size()) {
+                fileName = parsedTokens.get(redirectionIndex + 1);
+                // Extract only the arguments BEFORE the '>'
+                actualArgs = parsedTokens.subList(1, redirectionIndex);
+            } else {
+                actualArgs = commandArgs;
+            }
+
+//            String output = commandExecution(parsedTokens, command, commandArgs);
+// 2. Execute command with CLEAN arguments
+            String output = commandExecution(parsedTokens, command, actualArgs);
+
+            // 3. Handle Output (Redirect or Print)
+            if (fileName != null) {
+                try {
+                    Path path = Paths.get(fileName);
+                    if (path.getParent() != null) {
+                        Files.createDirectories(path.getParent());
+                    }
+                    // Write output to file (ensure a newline at the end if required by the command)
+                    Files.writeString(path, output + (output.isEmpty() ? "" : "\n"));
+                } catch (IOException e) {
+                    // Do not print extra "out=" text, testers usually expect standard shell error format
+                    System.err.println("Error writing to file: " + e.getMessage());
+                }
+            } else {
+                // Normal execution: print to console
+                if (!output.isEmpty()) {
+                    System.out.println(output);
+                }
+            }
+
+//            Boolean redirectionExists = redirectionExists(commandArgs);
+//
+//            if (redirectionExists) {
+//                if (parsedTokens.size() >= 4) {
+////                    String fileName = parsedTokens.get(3);
+//
+//                    String delimiter = "> ";
+////                    int index = parsedTokens.indexOf(delimiter);
+//                    String fileName = "";
+////                    if (index != -1) {
+//                        // index + 2 to skip the '>' and the ' '
+////                        fileName = input.substring(index + delimiter.length()).trim();
+//                        fileName=parsedTokens.getLast();
+////                    }
+//                    try {
+//                        if (fileName.isEmpty()) {
+//                            System.out.println("Syntax error44: No file specified for output redirection.");
+//                            continue;
+//                        }
+//                        Path path = Paths.get(fileName);
+//                        // 1. Check if parent directory exists; if not, create it
+//                        if (path.getParent() != null) {
+//                            Files.createDirectories(path.getParent());
+//                        }
+//                        // 2. Now you can safely write to the file
+//                        System.out.println("out= "+output);
+//                        Files.writeString(path, output);
+////                        java.nio.file.Files.writeString(java.nio.file.Paths.get(shellState.getCurrentPath(), fileName), output);
+//                    } catch (IOException e) {
+//                        System.out.println("Error writing to file: " + e.getMessage());
+//                    }
+//                }
+//                else {
+//                    System.out.println("Syntax error1: No file specified for output redirection.");
+//                }
+//            }
 
         }
 
@@ -298,6 +341,16 @@ public class Main {
                     output = "type: too many arguments";
                 }
                 break;
+            case "ls":
+                boolean oneColumn = commandArgs.contains("-1");
+                // Filter out flags and redirection tokens to find the target directory
+                String targetDir = commandArgs.stream()
+                        .filter(s -> !s.equals("-1") && !s.equals(">") && !s.equals("1>") && !s.equals(parsedTokens.getLast()))
+                        .findFirst()
+                        .orElse("."); // Default to current directory
+
+                output = listDirectory(targetDir, oneColumn);
+                break;
             default:
                 // External Command Execution
                 String executablePath = findExecutableOnPath(command);
@@ -325,5 +378,14 @@ public class Main {
                 .anyMatch(s -> s.equals(">") || s.equals("1>"));
         return hasRedirection;
 //        return matcher.find();
+    }
+    private String listDirectory(String path, boolean oneColumn) {
+        try (Stream<Path> stream = Files.list(Paths.get(path))) {
+            return stream.map(p -> p.getFileName().toString())
+                    .sorted()
+                    .collect(Collectors.joining(oneColumn ? "\n" : " "));
+        } catch (IOException e) {
+            return "ls: " + path + ": No such file or directory";
+        }
     }
 }
