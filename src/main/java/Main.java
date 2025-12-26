@@ -48,12 +48,9 @@ public class Main {
             Boolean redirectionExists = redirectionExists(commandArgs);
 
             if (redirectionExists) {
-                if (parsedTokens.size() >= 4) {
+//                if (parsedTokens.size() >= 4) {
 //                    String fileName = parsedTokens.get(3);
-                    for (String token:parsedTokens
-                         ) {
-                        System.out.print("obj="+token);
-                    }
+
                     String delimiter = "> ";
                     int index = parsedTokens.indexOf(delimiter);
                     String fileName = "";
@@ -71,9 +68,10 @@ public class Main {
                     } catch (IOException e) {
                         System.out.println("Error writing to file: " + e.getMessage());
                     }
-                } else {
-                    System.out.println("Syntax error: No file specified for output redirection.");
-                }
+//                }
+//                else {
+//                    System.out.println("Syntax error: No file specified for output redirection.");
+//                }
             }
 
         }
