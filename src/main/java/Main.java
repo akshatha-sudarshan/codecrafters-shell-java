@@ -52,17 +52,17 @@ public class Main {
 //                    String fileName = parsedTokens.get(3);
 
                     String delimiter = "> ";
-                    int index = parsedTokens.indexOf(delimiter);
+//                    int index = parsedTokens.indexOf(delimiter);
                     String fileName = "";
-                    if (index != -1) {
+//                    if (index != -1) {
                         // index + 2 to skip the '>' and the ' '
 //                        fileName = input.substring(index + delimiter.length()).trim();
                         fileName=parsedTokens.getLast();
-                        System.out.println("name = "+fileName);
-                    }
+                        System.out.print("name = "+fileName);
+//                    }
                     try {
                         if (fileName.isEmpty()) {
-                            System.out.println("Syntax error: No file specified for output redirection.");
+                            System.out.println("Syntax error44: No file specified for output redirection.");
                             continue;
                         }
                         java.nio.file.Files.writeString(java.nio.file.Paths.get(shellState.getCurrentPath(), fileName), output);
