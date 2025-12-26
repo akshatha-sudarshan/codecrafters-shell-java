@@ -51,7 +51,7 @@ public class Main {
                 if (parsedTokens.size() >= 4) {
 //                    String fileName = parsedTokens.get(3);
                     String delimiter = "> ";
-                    int index = input.indexOf(delimiter);
+                    int index = parsedTokens.indexOf(delimiter);
                     String fileName = "";
                     if (index != -1) {
                         // index + 2 to skip the '>' and the ' '
