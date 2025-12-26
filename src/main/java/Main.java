@@ -52,7 +52,7 @@ public class Main {
 //                    String fileName = parsedTokens.get(3);
                     for (String token:parsedTokens
                          ) {
-                        System.out.println(token);
+                        System.out.print("obj="+token);
                     }
                     String delimiter = "> ";
                     int index = parsedTokens.indexOf(delimiter);
