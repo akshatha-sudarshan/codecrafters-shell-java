@@ -73,6 +73,7 @@ public class Main {
                             Files.createDirectories(path.getParent());
                         }
                         // 2. Now you can safely write to the file
+                        System.out.println("out= "+output);
                         Files.writeString(path, output);
 //                        java.nio.file.Files.writeString(java.nio.file.Paths.get(shellState.getCurrentPath(), fileName), output);
                     } catch (IOException e) {
@@ -253,7 +254,7 @@ public class Main {
                         output += " ";
                     }
                 }
-//                System.out.println();
+                System.out.print("output inside echo= " + output);
                 break;
             case "pwd":
                 // NEW PWD: Uses the persistent state
