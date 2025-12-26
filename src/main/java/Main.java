@@ -45,7 +45,7 @@ public class Main {
             List<String> commandArgs = parsedTokens.size() > 1 ? parsedTokens.subList(1, parsedTokens.size()) : new ArrayList<>();
             String output = commandExecution(parsedTokens, command, commandArgs);
             // --- Output Redirection Handling ---
-            Boolean redirectionExists = redirectionExists(input);
+            Boolean redirectionExists = redirectionExists(commandArgs);
 
             if (redirectionExists) {
                 if (parsedTokens.size() >= 4) {
@@ -303,9 +303,13 @@ public class Main {
         return output;
     }
 
-    public Boolean redirectionExists(String input) {
-        Pattern pattern = Pattern.compile("\\s*(>|1>)\\s*\\S+\\s*$");
-        Matcher matcher = pattern.matcher(input);
-        return matcher.find();
+    public Boolean redirectionExists(List<String> commandArgs) {
+//        Pattern pattern = Pattern.compile("\\s*(>|1>)\\s*\\S+\\s*$");
+//        Matcher matcher = pattern.matcher(input);
+        // Check for exact matches
+         boolean hasRedirection = commandArgs.stream()
+                .anyMatch(s -> s.equals(">") || s.equals("1>"));
+        return hasRedirection;
+//        return matcher.find();
     }
 }
