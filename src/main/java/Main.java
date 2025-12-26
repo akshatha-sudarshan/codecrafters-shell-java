@@ -297,7 +297,6 @@ public class Main {
                         output += " ";
                     }
                 }
-                System.out.print("output inside echo= " + output);
                 break;
             case "pwd":
                 // NEW PWD: Uses the persistent state
