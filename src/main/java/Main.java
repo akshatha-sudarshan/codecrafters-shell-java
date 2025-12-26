@@ -71,7 +71,7 @@ public class Main {
                     }
                 }
                 else {
-                    System.out.println("Syntax error: No file specified for output redirection.");
+                    System.out.println("Syntax error1: No file specified for output redirection.");
                 }
             }
 
