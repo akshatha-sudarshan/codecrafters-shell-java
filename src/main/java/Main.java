@@ -50,6 +50,10 @@ public class Main {
             if (redirectionExists) {
                 if (parsedTokens.size() >= 4) {
 //                    String fileName = parsedTokens.get(3);
+                    for (String token:parsedTokens
+                         ) {
+                        System.out.println(token);
+                    }
                     String delimiter = "> ";
                     int index = parsedTokens.indexOf(delimiter);
                     String fileName = "";
