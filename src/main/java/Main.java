@@ -55,10 +55,11 @@ public class Main {
                     String fileName = "";
                     if (index != -1) {
                         // index + 2 to skip the '>' and the ' '
-                        fileName = input.substring(index + delimiter.length()).trim();
+//                        fileName = input.substring(index + delimiter.length()).trim();
+                        fileName=parsedTokens.getLast();
                     }
                     try {
-                        if (!fileName.isEmpty()) {
+                        if (fileName.isEmpty()) {
                             System.out.println("Syntax error: No file specified for output redirection.");
                             continue;
                         }
