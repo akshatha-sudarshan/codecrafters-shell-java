@@ -62,9 +62,9 @@ public class Main {
             if (redirectionIndex != -1 && redirectionIndex + 1 < parsedTokens.size()) {
                 fileName = parsedTokens.get(redirectionIndex + 1);
                 // Extract only the arguments BEFORE the '>'
-                actualArgs = parsedTokens.subList(1, redirectionIndex);
+                actualArgs = new ArrayList<>(parsedTokens.subList(1, redirectionIndex));
             } else {
-                actualArgs = commandArgs;
+                actualArgs = new ArrayList<>(parsedTokens.subList(1, parsedTokens.size()));
             }
 
 //            String output = commandExecution(parsedTokens, command, commandArgs);
@@ -289,14 +289,14 @@ public class Main {
         switch (command) {
             case "echo":
                 // Your original echo logic
-                for (int i = 1; i < parsedTokens.size(); i++) {
-//                        System.out.print(parsedTokens.get(i));
-                    output += parsedTokens.get(i);
-                    if (i != parsedTokens.size() - 1) {
-//                            System.out.print(" ");
-                        output += " ";
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < commandArgs.size(); i++) {
+                    sb.append(commandArgs.get(i));
+                    if (i < commandArgs.size() - 1) {
+                        sb.append(" ");
                     }
                 }
+                output = sb.toString();
                 break;
             case "pwd":
                 // NEW PWD: Uses the persistent state
